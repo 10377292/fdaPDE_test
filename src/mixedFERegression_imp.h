@@ -299,7 +299,10 @@ void MixedFERegression<InputHandler,Integrator,ORDER>::computeDegreesOfFreedomEx
 	_var[output_index] = 0;
 	
 	std::cout << "Time required for GCV computation" << std::endl;
-	clock.stop();
+	timespec time;
+	time = 	clock.stop();
+	_time[output_index]= (long long)time.tv_sec + (double)time.tv_nsec/1000000000;
+
 }
 
 template<typename InputHandler, typename Integrator, UInt ORDER>
@@ -368,7 +371,10 @@ void MixedFERegression<InputHandler,Integrator,ORDER>::computeDegreesOfFreedomSt
 
 
 	std::cout << "Time required to calculate the GCV" << std::endl;
-	clock1.stop();
+	timespec time;
+	time = 	clock1.stop();
+	_time[output_index]= (long long)time.tv_sec + (double)time.tv_nsec/1000000000;
+
 }
 
 
@@ -434,13 +440,11 @@ void MixedFERegression<InputHandler,Integrator,ORDER>::smoothLaplace()
 
 		std::cout << "System resolution: time" << std::endl;
 		timer clock;
-		timespec time;
 		clock.start();
 		system_factorize();
 		_solution[i] = this->template system_solve(this->_b);
-		time = clock.stop();
-		_time[i]= (long long)time.tv_sec + (double)time.tv_nsec/1000000000;
-
+		clock.stop();
+		
 		if(regressionData_.computeDOF())
 			computeDegreesOfFreedom(i, lambda);
 		else
