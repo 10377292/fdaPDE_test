@@ -367,7 +367,7 @@ void MixedFERegression<InputHandler,Integrator,ORDER>::computeDegreesOfFreedomSt
 	_dof[output_index] = mean;
 	var /= nrealizations;
 	var -= mean*mean;
-	_var[output_index]=var;
+	//_var[output_index]=var;
 
 
 	std::cout << "Time required to calculate the GCV" << std::endl;
@@ -620,6 +620,31 @@ void MixedFERegression<InputHandler,Integrator,ORDER>::smoothEllipticPDESpaceVar
 		_solution[i] = this->template system_solve(this->_b);
 		time = clock.stop();
 		_time[i]= (long long)time.tv_sec + (double)time.tv_nsec/1000000000;
+
+
+		MatrixXr W(this->regressionData_.getCovariates());
+
+		VectorXr w = W.block(0,0,nnodes,1)
+
+		MatrixXr b = MatrixXr::Zero(2*nnodes,1);
+		b.topRows(nnodes) = w;
+
+		MatrixXr x1 = system_solve(b);
+
+		MatrixXr In = MatrixXr::Zero(2*nnodes,nnodes);
+		In.topRows(nnodes) = MatrixXr::Identity(nnodes, nnodes);
+
+		MatrixXr x2 = In.transpose() * x1;
+
+		MatrixXr x3 = In * LeftMultiplybyQ(x2);
+
+		MatrixXr x4 = system_solve(x3);
+
+		MatrixXr x5 = In.transpose()*x4;
+
+		_var[i]= w *x5;
+
+
 
 		if(regressionData_.computeDOF())
 			computeDegreesOfFreedom(i, lambda);
