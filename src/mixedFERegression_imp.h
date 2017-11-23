@@ -624,17 +624,17 @@ void MixedFERegression<InputHandler,Integrator,ORDER>::smoothEllipticPDESpaceVar
 
 		MatrixXr W(this->regressionData_.getCovariates());
 
+		UInt nlocations = regressionData_.getNumberofObservations();
 
-
-		VectorXr w = W.block(0,0,nnodes,1);
+		VectorXr w = W.block(0,0,nlocations,1);
 
 		VectorXr b = VectorXr::Zero(2*nnodes);
-		b.topRows(nnodes) = w;
+		b.topRows(nlocations) = w;
 
 		VectorXr x1 = system_solve(b);
 
-		MatrixXr In = MatrixXr::Zero(2*nnodes,nnodes);
-		In.topRows(nnodes) = MatrixXr::Identity(nnodes, nnodes);
+		MatrixXr In = MatrixXr::Zero(2*nnodes,nlocations);
+		In.topRows(nlocations) = MatrixXr::Identity(nlocations, nlocations);
 
 		VectorXr x2 = In.transpose() * x1;
 
@@ -645,8 +645,6 @@ void MixedFERegression<InputHandler,Integrator,ORDER>::smoothEllipticPDESpaceVar
 		VectorXr x5 = In.transpose()*x4;
 
 		auto x6 = w.transpose() *x5;
-
-		std::cout << "x6" << x6[0,0] << std::endl;
 
 		_var[i]= x6[0,0];
 
